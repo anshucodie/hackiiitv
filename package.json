@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.13.0",
+    "@google/generative-ai": "^0.24.0",
     "framer-motion": "^11.3.24",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.2",

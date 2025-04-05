@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 // Template options for legal documents
@@ -24,16 +24,22 @@ const DOCUMENT_TEMPLATES = [
     description: "Define scope of services and payment terms",
   },
   {
-    id: "lease",
-    name: "Lease Agreement",
-    icon: "🏢",
-    description: "Property rental terms and conditions",
-  },
-  {
     id: "partnership",
     name: "Partnership Agreement",
     icon: "🤝",
     description: "Terms for business partnerships",
+  },
+  {
+    id: "custom",
+    name: "Custom Template",
+    icon: "✨",
+    description: "Generate a custom template using AI",
+  },
+  {
+    id: "upload",
+    name: "Upload Template",
+    icon: "📤",
+    description: "Upload your own template file",
   },
 ];
 
@@ -262,7 +268,64 @@ export default function Documents() {
   const [confirmDeleteModalOpen, setConfirmDeleteModalOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editPrompt, setEditPrompt] = useState("");
+  const [isEditingWithAI, setIsEditingWithAI] = useState(false);
+  const [showCustomTemplateModal, setShowCustomTemplateModal] = useState(false);
+  const [customTemplatePrompt, setCustomTemplatePrompt] = useState("");
+  const [isGeneratingTemplate, setIsGeneratingTemplate] = useState(false);
   const router = useRouter();
+
+  // Create a file input ref
+  const fileInputRef = useRef(null);
+
+  // Handle AI editing
+  const handleAIEdit = async () => {
+    if (!editPrompt.trim()) {
+      alert("Please enter a prompt for editing");
+      return;
+    }
+
+    setIsEditingWithAI(true);
+    try {
+      const response = await fetch("/api/documents/edit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: documentContent,
+          prompt: editPrompt,
+        }),
+      });
+
+      // Get response as text first for debugging
+      const responseText = await response.text();
+      console.log("Raw API response:", responseText);
+
+      // Parse the response text as JSON
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse response as JSON:", e);
+        throw new Error(`Server returned invalid JSON: ${responseText}`);
+      }
+
+      if (data.success) {
+        setDocumentContent(data.editedContent);
+        setEditPrompt(""); // Clear the prompt after successful edit
+      } else {
+        throw new Error(
+          data.error || "Unknown error occurred while editing document"
+        );
+      }
+    } catch (error) {
+      console.error("Error editing document:", error);
+      alert(`Failed to edit document: ${error.message}`);
+    } finally {
+      setIsEditingWithAI(false);
+    }
+  };
 
   // Fetch documents on component mount
   useEffect(() => {
@@ -426,20 +489,143 @@ export default function Documents() {
     });
   };
 
+  // Handle template action based on template type
+  const handleTemplateAction = (template) => {
+    if (template.id === "custom") {
+      // Show custom template modal
+      setShowCustomTemplateModal(true);
+    } else if (template.id === "upload") {
+      // Trigger file input click
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    }
+  };
+
+  // Handle custom template creation
+  const handleCreateCustomTemplate = async () => {
+    if (!customTemplatePrompt.trim()) {
+      alert("Please enter a prompt for generating the template");
+      return;
+    }
+
+    setIsGeneratingTemplate(true);
+    try {
+      const response = await fetch("/api/documents/edit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content:
+            "Please generate a new document template based on the following description.", // Non-empty content
+          prompt: `Generate a detailed ${customTemplatePrompt} document template. Make it professional and comprehensive.`,
+        }),
+      });
+
+      const responseText = await response.text();
+      console.log("Raw API response:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("Failed to parse response as JSON:", e);
+        throw new Error(`Server returned invalid JSON: ${responseText}`);
+      }
+
+      if (data.success) {
+        // Set the generated template content
+        setDocumentContent(data.editedContent);
+        setDocumentName(
+          `Custom ${customTemplatePrompt} - ${new Date().toLocaleDateString()}`
+        );
+
+        // Create a custom template object
+        const customTemplate = {
+          id: "custom-generated",
+          name: `Custom: ${customTemplatePrompt}`,
+          icon: "✨",
+          description: "AI-generated custom template",
+        };
+
+        setSelectedTemplate(customTemplate);
+        setShowCustomTemplateModal(false);
+        setIsEditing(true);
+        setCustomTemplatePrompt("");
+      } else {
+        throw new Error(data.error || "Failed to generate template");
+      }
+    } catch (error) {
+      console.error("Error generating template:", error);
+      alert(`Failed to generate template: ${error.message}`);
+    } finally {
+      setIsGeneratingTemplate(false);
+    }
+  };
+
+  // Handle file upload
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    if (file.type !== "text/plain" && !file.name.endsWith(".txt")) {
+      alert("Please upload a .txt file");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const content = e.target.result;
+
+      // Create an uploaded template object
+      const uploadedTemplate = {
+        id: "uploaded",
+        name: file.name.replace(".txt", ""),
+        icon: "📤",
+        description: "Uploaded template file",
+      };
+
+      setSelectedTemplate(uploadedTemplate);
+      setDocumentContent(content);
+      setDocumentName(
+        `${file.name.replace(".txt", "")} - ${new Date().toLocaleDateString()}`
+      );
+      setIsEditing(true);
+    };
+
+    reader.onerror = () => {
+      alert("Error reading file");
+    };
+
+    reader.readAsText(file);
+  };
+
   return (
-    <div className="p-6">
-      <div className="flex justify-between">
-        <h1 className="text-3xl text-black font-bold mb-4 ">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl text-black font-bold flex items-center">
           Here are all your documents!
         </h1>
         <div
           className="text-3xl h-10 p-2 font-thin text-black flex items-center gap-2 border-1 rounded-[20px] border-black cursor-pointer hover:bg-gray-100"
           onClick={() => setShowModal(true)}
         >
-          <img src="/plus3.svg" alt="plus" className="w-7 h-7 " />
+          <img src="/plus3.svg" alt="plus" className="w-7 h-7" />
           <span className="text-lg">Add Document</span>
         </div>
       </div>
+
+      {/* Hidden file input for template upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".txt"
+        style={{ display: "none" }}
+        onChange={handleFileUpload}
+      />
 
       {/* Documents Table */}
       <div className="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
@@ -675,11 +861,30 @@ export default function Documents() {
                 </svg>
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-              {DOCUMENT_TEMPLATES.map((template) => (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {DOCUMENT_TEMPLATES.slice(0, 4).map((template) => (
                 <div
                   key={template.id}
                   onClick={() => handleSelectTemplate(template)}
+                  className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center">
+                    <div className="text-3xl mr-4">{template.icon}</div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{template.name}</h3>
+                      <p className="text-sm text-gray-600">
+                        {template.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {DOCUMENT_TEMPLATES.slice(4).map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => handleTemplateAction(template)}
                   className="border border-gray-200 rounded-lg p-4 cursor-pointer hover:bg-gray-50 transition-colors"
                 >
                   <div className="flex items-center">
@@ -753,6 +958,62 @@ export default function Documents() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="Enter document name"
               />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="edit-prompt"
+                className="block text-sm font-medium text-gray-700"
+              >
+                AI Edit Prompt
+              </label>
+              <div className="mt-1 flex rounded-md shadow-sm">
+                <input
+                  type="text"
+                  id="edit-prompt"
+                  value={editPrompt}
+                  onChange={(e) => setEditPrompt(e.target.value)}
+                  className="flex-1 block w-full border border-gray-300 rounded-l-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                  placeholder="Enter instructions for AI to edit the document..."
+                />
+                <button
+                  onClick={handleAIEdit}
+                  disabled={isEditingWithAI || !editPrompt.trim()}
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white ${
+                    isEditingWithAI || !editPrompt.trim()
+                      ? "bg-indigo-300 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  }`}
+                >
+                  {isEditingWithAI ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Editing...
+                    </>
+                  ) : (
+                    "Edit with AI"
+                  )}
+                </button>
+              </div>
             </div>
 
             <div className="flex-grow overflow-hidden">
@@ -1005,6 +1266,95 @@ export default function Documents() {
                   </span>
                 ) : (
                   "Delete Document"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Template Modal */}
+      {showCustomTemplateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Create Custom Template</h2>
+              <button
+                onClick={() => {
+                  setShowCustomTemplateModal(false);
+                  setCustomTemplatePrompt("");
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="custom-template-prompt"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Template Description
+              </label>
+              <input
+                type="text"
+                id="custom-template-prompt"
+                value={customTemplatePrompt}
+                onChange={(e) => setCustomTemplatePrompt(e.target.value)}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter a description for the custom template"
+              />
+            </div>
+
+            <div className="flex justify-center space-x-3">
+              <button
+                onClick={handleCreateCustomTemplate}
+                disabled={isGeneratingTemplate || !customTemplatePrompt.trim()}
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                  isGeneratingTemplate || !customTemplatePrompt.trim()
+                    ? "bg-indigo-300 cursor-not-allowed"
+                    : ""
+                }`}
+              >
+                {isGeneratingTemplate ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Generating...
+                  </>
+                ) : (
+                  "Create Template"
                 )}
               </button>
             </div>
