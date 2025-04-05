@@ -30,14 +30,16 @@ export async function GET(req, { params }) {
   }
 }
 
-// Update a document (used for favoriting)
+// Update an existing document
 export async function PATCH(req, { params }) {
   try {
     await dbConnect();
     const { id } = params;
-    const { userId } = auth();
-    const data = await req.json();
 
+    // Parse request body
+    const updates = await req.json();
+
+    // Get current document to check if it exists and belongs to user
     const document = await Document.findById(id);
 
     if (!document) {
@@ -47,19 +49,36 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    // If checking for ownership:
+    // Optional: Check if the user owns the document (in a real app)
+    // const { userId } = auth();
     // if (document.userId && document.userId !== userId) {
-    //   return NextResponse.json(
-    //     { success: false, error: "Not authorized to update this document" },
-    //     { status: 403 }
-    //   );
+    //   return NextResponse.json({ success: false, error: "Not authorized to update this document" }, { status: 403 });
     // }
+
+    // Allow updating specific fields
+    const allowedUpdates = {};
+
+    if (updates.hasOwnProperty("isFavorite")) {
+      allowedUpdates.isFavorite = updates.isFavorite;
+    }
+
+    if (updates.hasOwnProperty("name")) {
+      allowedUpdates.name = updates.name;
+    }
+
+    if (updates.hasOwnProperty("content")) {
+      allowedUpdates.content = updates.content;
+    }
+
+    if (updates.hasOwnProperty("expiryDate")) {
+      allowedUpdates.expiryDate = updates.expiryDate;
+    }
 
     // Update the document
     const updatedDocument = await Document.findByIdAndUpdate(
       id,
-      { $set: data },
-      { new: true } // Return the updated document
+      { $set: allowedUpdates },
+      { new: true }
     );
 
     return NextResponse.json({
@@ -69,7 +88,11 @@ export async function PATCH(req, { params }) {
   } catch (error) {
     console.error("Error updating document:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to update document" },
+      {
+        success: false,
+        error: "Failed to update document",
+        message: error.message,
+      },
       { status: 500 }
     );
   }

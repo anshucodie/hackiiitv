@@ -33,6 +33,11 @@ const DocumentSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  // Expiry date field
+  expiryDate: {
+    type: Date,
+    required: false,
+  },
   // Sharing fields
   isShared: {
     type: Boolean,
