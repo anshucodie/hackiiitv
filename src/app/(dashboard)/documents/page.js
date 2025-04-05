@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 // Template options for legal documents
 const DOCUMENT_TEMPLATES = [
@@ -21,7 +22,7 @@ const DOCUMENT_TEMPLATES = [
     id: "services",
     name: "Service Agreement",
     icon: "🔧",
-    description: "Define scope of services and payment terms",
+    description: "Define services and payment terms",
   },
   {
     id: "partnership",
@@ -604,13 +605,13 @@ export default function Documents() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 border border-[#cfd490] rounded-lg h-[calc(100vh-16px)] flex flex-col">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl text-black font-bold flex items-center">
+        <h1 className="text-3xl text-black font-bold flex items-center ml-2">
           Here are all your documents!
         </h1>
         <div
-          className="text-3xl h-10 p-2 font-thin text-black flex items-center gap-2 border-1 rounded-[20px] border-black cursor-pointer hover:bg-gray-100"
+          className="text-3xl h-10 p-2 mr-2 font-thin text-black flex items-center gap-2 border-1 rounded-[20px] border-[#cfd490] cursor-pointer hover:bg-gray-100"
           onClick={() => setShowModal(true)}
         >
           <img src="/plus3.svg" alt="plus" className="w-7 h-7" />
@@ -628,10 +629,10 @@ export default function Documents() {
       />
 
       {/* Documents Table */}
-      <div className="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden border border-[#cfd490]">
+        <div className="overflow-y-auto h-full">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th
                   scope="col"
