@@ -26,7 +26,7 @@ export default function RootLayout({ children }) {
             <h1 className="text-white text-2xl font-bold mb-4">Documi</h1>
             <nav className="flex flex-col gap-2">
               <Link
-                href="/dashboard"
+                href="/dashboard-home"
                 className="text-white hover:bg-[#2a2a2a] p-3 rounded-lg transition-colors"
               >
                 Home
