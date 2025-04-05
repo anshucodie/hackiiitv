@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import Image from 'next/image'
 import "../globals.css";
 
 const geistSans = Geist({
@@ -21,7 +22,16 @@ export default function RootLayout({ children }) {
   return (
     <div className="bg-[#181818] flex h-screen p-[1%] w-full">
       <div className="w-[20%] flex flex-col gap-4 p-4">
-        <h1 className="text-white text-2xl font-bold mb-4">Documi</h1>
+        <Link href="/">
+        <Image
+          src="./logoSidebar.svg"
+          width={100}
+          height={60}
+          alt="Picture of the author"
+          className="mt-[4%] ml-[5%] "
+        />
+        </Link>
+
         <nav className="flex flex-col gap-2">
           <Link
             href="/dashboard-home"
