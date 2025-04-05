@@ -4,10 +4,12 @@
 import { SignedIn, SignedOut, SignOutButton, SignUpButton, SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from 'next/image'
+import { useUser } from "@clerk/nextjs";
 
 import { motion } from 'framer-motion';
 
 import { Pacifico } from 'next/font/google';
+import { useEffect } from "react";
 
 
 
@@ -33,6 +35,7 @@ const item = {
 
 
 export default function HomePage() {
+
   return (
     <div className="w-full h-screen flex flex-col items-center ">
       <nav className="px-[4%] py-[.5%] w-full absolute flex justify-between items-center  mt-[1%]">
