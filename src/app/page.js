@@ -1,17 +1,16 @@
-import Link from 'next/link';
-import { currentUser } from '@clerk/nextjs/server';
-import { UserButton } from '@clerk/nextjs';
+import Link from "next/link";
+import { currentUser } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
 
 export default async function HomePage() {
   const user = await currentUser();
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen px-4 text-center">
-      <h1 className="text-4xl font-bold mb-2">
-        🧾 LegalDocs for Startups
-      </h1>
+      <h1 className="text-4xl font-bold mb-2">🧾 LegalDocs for Startups</h1>
       <p className="text-gray-600 max-w-xl mb-6">
-        Generate legal docs like NDAs, Contracts, and Founder Agreements in seconds. Perfect for small teams and solo founders.
+        Generate legal docs like NDAs, Contracts, and Founder Agreements in
+        seconds. Perfect for small teams and solo founders.
       </p>
 
       {!user ? (
@@ -38,5 +37,3 @@ export default async function HomePage() {
     </main>
   );
 }
-
-export default Home;
