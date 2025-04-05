@@ -74,7 +74,11 @@ export default function DashboardHome() {
       {/* Grid Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Stats */}
-        <div className="bg-transparent shadow rounded-2xl p-5 border-2 border-[#cfd490] px-4 py-4 rounded-3xl">
+        <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }} 
+        className="bg-transparent shadow rounded-2xl p-5 border-2 border-[#cfd490] px-4 py-4 rounded-3xl">
           <div className="flex flex-row gap-2 ">
             <ChartColumn />
             <h2 className="font-semibold text-lg mb-2"> Your Stats</h2>
@@ -85,10 +89,14 @@ export default function DashboardHome() {
             <li>Pending Signatures: <strong>{pending}</strong></li>
             <li>Most Used Template: <strong>Service Agreement</strong></li>
           </ul>
-        </div>
+        </motion.div>
 
         {/* Recent Activity */}
-        <div className="bg-transparent shadow rounded-2xl p-5 md:col-span-2 border-2 border-[#cfd490] px-4 py-4 rounded-3xl">
+        <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }} 
+        className="bg-transparent shadow rounded-2xl p-5 md:col-span-2 border-2 border-[#cfd490] px-4 py-4 rounded-3xl">
           <div className="flex flex-row gap-2">
             <History />
             <h2 className="font-semibold text-lg mb-2">Recent Activity</h2>
@@ -101,7 +109,7 @@ export default function DashboardHome() {
               </li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       </div>
 
 
