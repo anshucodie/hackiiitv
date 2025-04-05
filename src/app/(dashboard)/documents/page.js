@@ -835,8 +835,8 @@ export default function Documents() {
 
             <div className="mb-4">
               <p className="text-gray-600">
-                Share "{selectedDocumentForShare.name}" with others. They will
-                be able to view and download this document.
+                Share &quot;{selectedDocumentForShare.name}&quot; with others.
+                They will be able to view and download this document.
               </p>
             </div>
 
