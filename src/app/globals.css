@@ -26,3 +26,115 @@ body {
   color: var(--foreground);
   font-family: 'Manrope', Arial, Helvetica, sans-serif;
 }
+
+.pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+/* In globals.css */
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* In globals.css */
+.shimmer {
+  background: linear-gradient(90deg, #f3f5ec, #dcdcdc, #f3f5ec);
+  background-size: 200% 100%;
+  animation: shimmer 2.5s infinite linear;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-dark {
+  background: linear-gradient(
+    90deg,
+    #181818,
+    #2a2a2a,
+    #3a3a3a,
+    #2a2a2a,
+    #181818
+  );
+  background-size: 200% 100%;
+  animation: shimmerDark 2.5s infinite linear;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shimmerDark {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.float-y {
+  animation: floatY 3s ease-in-out infinite;
+}
+
+@keyframes waveSlide {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
+.wave-slide {
+  animation: waveSlide 2.5s ease-in-out infinite;
+}
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink {
+  50% { border-color: transparent }
+}
+
+@keyframes hideCursor {
+  to {
+    border-right-color: transparent;
+  }
+}
+
+.typing-text {
+  overflow: hidden;
+  border-right: 2px solid #181818;
+  white-space: nowrap;
+  width: 0;
+  animation: typing 3s steps(30, end) forwards, blink 0.75s step-end 3s, hideCursor 0s forwards;
+  animation-delay: 0s, 0s, 3s;
+}
