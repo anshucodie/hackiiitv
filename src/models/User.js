@@ -12,19 +12,21 @@ const UserSchema = new Schema({
   },
   username: {
     type: String,
-    required: true,
+    required: false, // ⛔ Clerk doesn’t always provide this
   },
   photo: {
     type: String,
-    required: true,
+    required: false,
   },
   firstName: {
     type: String,
+    required: false,
   },
   lastName: {
     type: String,
+    required: false,
   },
-});
+}, { timestamps: true });
 
 const User = models.User || model("User", UserSchema);
 
