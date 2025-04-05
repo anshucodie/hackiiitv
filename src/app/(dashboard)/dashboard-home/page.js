@@ -1,10 +1,10 @@
-function Home() {
+import ClientPage from "../../../components/client";
+
+export default function DashboardHome() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Home</h1>
-      {/* Add your home content here */}
+      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+      <ClientPage />
     </div>
   );
 }
-
-export default Home;
