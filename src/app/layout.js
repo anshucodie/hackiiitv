@@ -2,6 +2,13 @@
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 
+import { Allura } from 'next/font/google'
+
+export const allura = Allura({
+  subsets: ['latin'],
+  weight: '400', // Allura only supports 400
+});
+
 export const metadata = {
   title: "Documi",
 };
