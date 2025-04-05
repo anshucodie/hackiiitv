@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6.13.0",
+    "@google/generative-ai": "^0.24.0",
     "framer-motion": "^12.6.3",
     "lucide-react": "^0.487.0",
     "mongodb": "^6.15.0",
