@@ -32,7 +32,7 @@ export default function HomePage() {
           Simplify the Paperwork.
         </h1>
         <h1 className="font-bold text-6xl text-[#C5C69A]">
-          Power Your <span className="border-b-2 border-black italic"> Business</span>.
+          Power Your <span className="border-b-2 border-black italic "> Business</span>.
         </h1>
         <p className="text-gray-900 mt-8 text-sm italic font-bold">
           Your one-stop tool to create, customize, and organize legal docs effortlessly
