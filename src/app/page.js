@@ -10,10 +10,10 @@ export default function HomePage() {
       <nav className="px-[4%] py-[.5%] w-full flex justify-between items-center shadow-xs">
         <h1 className="text-xl font-bold text-center text-white">Documi</h1>
 
-        <div className="flex flex-row gap-6 font-medium">
+        <div className="flex flex-row gap-3 font-medium">
           <SignedOut>
-            <SignInButton />
-            <SignUpButton />
+            <SignInButton className="px-8  border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110" />
+            <SignUpButton className="px-8 border-1 border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110"/>
           </SignedOut>
           <SignedIn>
             <Link
@@ -32,7 +32,7 @@ export default function HomePage() {
           Simplify the Paperwork.
         </h1>
         <h1 className="font-bold text-6xl text-[#C5C69A]">
-          Power Your <span className="border-b-2 border-black"> Business</span>.
+          Power Your <span className="border-b-2 border-black italic"> Business</span>.
         </h1>
         <p className="text-gray-900 mt-8 text-sm italic font-bold">
           Your one-stop tool to create, customize, and organize legal docs effortlessly
