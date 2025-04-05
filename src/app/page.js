@@ -4,16 +4,43 @@
 import { SignedIn, SignedOut, SignOutButton, SignUpButton, SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
+// At the top of your page.js
+import { Allura } from 'next/font/google'
+import { Dancing_Script } from 'next/font/google';
+import { Pacifico } from 'next/font/google';
+import { Great_Vibes } from 'next/font/google';
+
+const allura = Allura({
+  subsets: ['latin'],
+  weight: '400',
+});
+
+const pacifico = Pacifico({
+  subsets: ['latin'],
+  weight: '400',
+});
+
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['700'], // use 600 or 700 for bolder strokes
+});
+
+const greatVibes = Great_Vibes({
+  subsets: ['latin'],
+  weight: '400',
+});
+
 export default function HomePage() {
   return (
     <div className="w-full h-screen flex flex-col items-center">
       <nav className="px-[4%] py-[.5%] w-full flex justify-between items-center shadow-xs">
         <h1 className="text-xl font-bold text-center text-white">Documi</h1>
 
-        <div className="flex flex-row gap-6 font-medium">
+        <div className="flex flex-row gap-3 font-medium">
           <SignedOut>
-            <SignInButton />
-            <SignUpButton />
+            <SignInButton className="px-8  border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110" />
+            <SignUpButton className="px-8 border-1 border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110"/>
           </SignedOut>
           <SignedIn>
             <Link
@@ -32,9 +59,9 @@ export default function HomePage() {
           Simplify the Paperwork.
         </h1>
         <h1 className="font-bold text-6xl text-[#C5C69A]">
-          Power Your <span className="border-b-2 border-black"> Business</span>.
+          Power Your <span className={`border-b-2 border-black italic ${pacifico.className} `}> Business</span>.
         </h1>
-        <p className="text-gray-900 mt-8 text-sm italic font-bold">
+        <p className="text-gray-900 mt-8 text-sm  font-bold">
           Your one-stop tool to create, customize, and organize legal docs effortlessly
         </p>
       </div>
