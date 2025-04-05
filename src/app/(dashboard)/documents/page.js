@@ -605,7 +605,7 @@ export default function Documents() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 border border-[#cfd490] rounded-lg h-[calc(100vh-16px)] flex flex-col">
+    <div className="container mx-auto px-4 py-8 border border-[#cfd490] rounded-xl h-[calc(100vh-28px)] flex flex-col">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl text-black font-bold flex items-center ml-2">
           Here are all your documents!
@@ -632,7 +632,7 @@ export default function Documents() {
       <div className="flex-1 bg-white rounded-lg shadow-md overflow-hidden border border-[#cfd490]">
         <div className="overflow-y-auto h-full">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50 sticky top-0 z-10">
+            <thead className="bg-gray-50 h-15 sticky top-0 z-10">
               <tr>
                 <th
                   scope="col"
@@ -648,31 +648,31 @@ export default function Documents() {
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Size
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Download
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Favorite
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Share
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
                   Delete
                 </th>
@@ -739,9 +739,9 @@ export default function Documents() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{doc.size}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       <button
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="text-indigo-600 hover:text-indigo-900 inline-flex items-center justify-center"
                         onClick={() => handleDownload(doc._id, doc.name)}
                       >
                         <svg
@@ -760,12 +760,12 @@ export default function Documents() {
                         </svg>
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       <button
                         className={
                           doc.isFavorite
-                            ? "text-yellow-500 hover:text-yellow-700"
-                            : "text-gray-400 hover:text-yellow-500"
+                            ? "text-yellow-500 hover:text-yellow-700 inline-flex items-center justify-center"
+                            : "text-gray-400 hover:text-yellow-500 inline-flex items-center justify-center"
                         }
                         onClick={() =>
                           handleToggleFavorite(doc._id, doc.isFavorite)
@@ -787,9 +787,9 @@ export default function Documents() {
                         </svg>
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       <button
-                        className="text-blue-600 hover:text-blue-900"
+                        className="text-blue-600 hover:text-blue-900 inline-flex items-center justify-center"
                         onClick={() => handleShare(doc)}
                       >
                         <svg
@@ -808,9 +808,9 @@ export default function Documents() {
                         </svg>
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                       <button
-                        className="text-red-600 hover:text-red-900"
+                        className="text-red-600 hover:text-red-900 inline-flex items-center justify-center"
                         onClick={() => handleDelete(doc)}
                       >
                         <svg
