@@ -39,8 +39,8 @@ export default function HomePage() {
 
         <div className="flex flex-row gap-3 font-medium">
           <SignedOut>
-            <SignInButton className="px-8   border-[#181818] p-2 rounded-3xl text-sm text-center text-black  font-light hover:bg-[#181818] hover:border-2 hover:text-white transition duration-300 hover:scale-110" />
-            <SignUpButton className="px-8 border-2 border-[#181818] p-2 rounded-3xl text-sm text-center text-black font-light hover:bg-[#181818] hover:text-white transition duration-300 hover:scale-110"/>
+            <SignInButton className="px-8   border-[#181818] p-2 rounded-3xl text-sm text-center text-black  font-light hover:bg-[#181818] hover:border-2 hover:text-white transition duration-300 hover:scale-110 cursor-pointer" />
+            <SignUpButton className="px-8 border-2 border-[#181818] p-2 rounded-3xl text-sm text-center text-black font-light hover:bg-[#181818] hover:text-white transition duration-300 hover:scale-110 cursor-pointer"/>
           </SignedOut>
           <SignedIn>
             <Link
