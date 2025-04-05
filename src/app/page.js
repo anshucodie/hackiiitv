@@ -4,6 +4,33 @@
 import { SignedIn, SignedOut, SignOutButton, SignUpButton, SignInButton, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
+// At the top of your page.js
+import { Allura } from 'next/font/google'
+import { Dancing_Script } from 'next/font/google';
+import { Pacifico } from 'next/font/google';
+import { Great_Vibes } from 'next/font/google';
+
+const allura = Allura({
+  subsets: ['latin'],
+  weight: '400',
+});
+
+const pacifico = Pacifico({
+  subsets: ['latin'],
+  weight: '400',
+});
+
+
+const dancingScript = Dancing_Script({
+  subsets: ['latin'],
+  weight: ['700'], // use 600 or 700 for bolder strokes
+});
+
+const greatVibes = Great_Vibes({
+  subsets: ['latin'],
+  weight: '400',
+});
+
 export default function HomePage() {
   return (
     <div className="w-full h-screen flex flex-col items-center">
@@ -32,9 +59,9 @@ export default function HomePage() {
           Simplify the Paperwork.
         </h1>
         <h1 className="font-bold text-6xl text-[#C5C69A]">
-          Power Your <span className="border-b-2 border-black italic "> Business</span>.
+          Power Your <span className={`border-b-2 border-black italic ${pacifico.className} `}> Business</span>.
         </h1>
-        <p className="text-gray-900 mt-8 text-sm italic font-bold">
+        <p className="text-gray-900 mt-8 text-sm  font-bold">
           Your one-stop tool to create, customize, and organize legal docs effortlessly
         </p>
       </div>
