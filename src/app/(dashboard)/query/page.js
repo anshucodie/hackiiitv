@@ -19,6 +19,7 @@ export default function Query() {
   const [isLoading, setIsLoading] = useState(false);
   const [isDemoLoading, setIsDemoLoading] = useState(false);
   const [demoDocsLoaded, setDemoDocsLoaded] = useState(false);
+  const [arrowDirection, setArrowDirection] = useState("right");
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -31,6 +32,15 @@ export default function Query() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Update arrow direction based on input value
+  useEffect(() => {
+    if (inputValue.trim() !== "") {
+      setArrowDirection("up");
+    } else {
+      setArrowDirection("right");
+    }
+  }, [inputValue]);
 
   // Handle loading demo documents
   const handleLoadDemoDocuments = async () => {
@@ -81,6 +91,9 @@ export default function Query() {
     e.preventDefault();
 
     if (!inputValue.trim()) return;
+
+    // Set arrow direction back to right when sending
+    setArrowDirection("right");
 
     const userMessage = inputValue.trim();
     setInputValue("");
@@ -172,7 +185,7 @@ export default function Query() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 border border-[#cfd490] rounded-lg h-[calc(100vh-28px)] flex flex-col">
+    <div className="container mx-auto px-4 py-8 border border-[#cfd490] rounded-xl h-[calc(100vh-28px)] flex flex-col">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-2">
           <h1 className="text-3xl text-black font-bold flex items-center ml-2">
@@ -336,7 +349,9 @@ export default function Query() {
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
+              className={`h-6.5 w-5 transform transition-transform duration-300 ${
+                arrowDirection === "up" ? "-rotate-90" : ""
+              }`}
               viewBox="0 0 20 20"
               fill="currentColor"
             >
