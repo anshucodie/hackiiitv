@@ -27,19 +27,21 @@ export default function RootLayout({ children }) {
             <nav className="flex flex-col gap-2">
               <Link
                 href="/dashboard-home"
-                className="text-white hover:bg-[#2a2a2a] p-3 rounded-lg transition-colors"
+                className="text-white hover:bg-[#2a2a2a] p-3 rounded-lg transition-all hover:text-[#cfd490] hover:ring-2 hover:ring-[#cfd490] hover:ring-opacity-70 hover:shadow-[0_0_10px_rgba(148,147,36,0.7)]"
               >
                 Home
               </Link>
               <Link
                 href="/documents"
-                className="text-white hover:bg-[#2a2a2a] p-3 rounded-lg transition-colors"
+                className="text-white hover:bg-[#2a2a2a] p-3 rounded-lg transition-all hover:text-[#cfd490] hover:ring-2 hover:ring-[#cfd490] hover:ring-opacity-70 hover:shadow-[0_0_10px_rgba(148,147,36,0.7)]"
               >
                 Documents
               </Link>
             </nav>
           </div>
-          <div className="bg-[#f3f5ec] rounded-xl w-[80%]">{children}</div>
+          <div className="bg-[#f3f5ec] text-black rounded-xl w-[100%]">
+            {children}
+          </div>
         </div>
       </body>
     </html>

@@ -10,8 +10,8 @@ export default function RootLayout({ children }) {
     <ClerkProvider>
       <html>
         <body>
-          <div className="bg-[#181818] flex h-screen p-[1%] w-full">
-            <div className="bg-[#f3f5ec] rounded-xl w-[80%]">{children}</div>
+          <div className="bg-[#181818] flex h-screen w-full">
+            <div className="bg-[#f3f5ec] rounded-xl w-[100%]">{children}</div>
           </div>
         </body>
       </html>
