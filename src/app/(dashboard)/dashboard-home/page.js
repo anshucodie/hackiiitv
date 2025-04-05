@@ -350,15 +350,7 @@ export default function DashboardHome() {
         >
           <Plus /> New Document
         </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-[#181818] text-white py-2 px-6 rounded-3xl flex flex-row gap-3"
-        >
-          <File /> Browse Documents
-        </motion.button>
+
         {/* Scan Documents Button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
