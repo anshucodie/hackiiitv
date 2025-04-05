@@ -33,28 +33,31 @@ const greatVibes = Great_Vibes({
 
 export default function HomePage() {
   return (
-    <div className="w-full h-screen flex flex-col items-center">
-      <nav className="px-[4%] py-[.5%] w-full flex justify-between items-center shadow-xs">
-        <h1 className="text-xl font-bold text-center text-white">Documi</h1>
+    <div className="w-full h-screen flex flex-col items-center ">
+      <nav className="px-[4%] py-[.5%] w-full absolute flex justify-between items-center shadow-xs mt-[2%]">
+        <h1 className="text-xl font-bold text-center text-black">Documi</h1>
 
         <div className="flex flex-row gap-3 font-medium">
           <SignedOut>
-            <SignInButton className="px-8  border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110" />
-            <SignUpButton className="px-8 border-1 border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black tranblacksition duration-300 hover:scale-110"/>
+            <SignInButton className="px-8   border-[#181818] p-2 rounded-3xl text-sm text-center text-black  font-light hover:bg-[#181818] hover:border-2 hover:text-white transition duration-300 hover:scale-110" />
+            <SignUpButton className="px-8 border-2 border-[#181818] p-2 rounded-3xl text-sm text-center text-black font-light hover:bg-[#181818] hover:text-white transition duration-300 hover:scale-110"/>
           </SignedOut>
           <SignedIn>
             <Link
               href="/dashboard-home"
-              className="cursor-pointer px-8 border border-[#f3f5ec] p-2 rounded-3xl text-sm text-center font-light hover:bg-[#f3f5ec] hover:text-black transition duration-300 hover:scale-110"
+              className="cursor-pointer px-8 border-2 border-[#181818] p-2 rounded-3xl text-sm text-center text-black font-light hover:bg-[#181818] hover:text-white transition duration-300 hover:scale-110"
             >
               Dashboard
             </Link>
-            <UserButton />
+            <UserButton className="h-full w-full"/>
           </SignedIn>
         </div>
       </nav>
 
-      <div className="bg-[#f3f5ec] w-[98%] rounded-3xl h-full flex flex-col justify-center items-center text-center">
+      <div className="bg-[#f3f5ec] w-full  h-full flex flex-col  justify-center items-center text-center 
+       -z-10 inset-0  
+bg-[radial-gradient(circle,#73737350_1px,transparent_1px)] 
+bg-[size:10px_10px]">
         <h1 className="font-bold text-7xl text-black">
           Simplify the Paperwork.
         </h1>
