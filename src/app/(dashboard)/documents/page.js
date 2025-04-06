@@ -252,6 +252,125 @@ async function deleteDocument(documentId) {
   }
 }
 
+// Fallback template generator (when AI fails)
+const generateFallbackTemplate = (templateType) => {
+  const cleanType = templateType.toLowerCase().trim();
+  let template = "";
+
+  if (cleanType.includes("agreement") || cleanType.includes("contract")) {
+    template = `# ${templateType.toUpperCase()} AGREEMENT
+
+This Agreement is made on [DATE] between:
+
+[PARTY A NAME] ("Party A"), with address at [PARTY A ADDRESS]
+
+and
+
+[PARTY B NAME] ("Party B"), with address at [PARTY B ADDRESS]
+
+## 1. PURPOSE
+[Describe the purpose of this agreement]
+
+## 2. TERM
+This Agreement shall commence on [START DATE] and continue until [END DATE] unless terminated earlier.
+
+## 3. RESPONSIBILITIES
+### Party A agrees to:
+- [List responsibilities]
+
+### Party B agrees to:
+- [List responsibilities]
+
+## 4. COMPENSATION
+[Describe payment terms]
+
+## 5. CONFIDENTIALITY
+Both parties agree to maintain confidentiality regarding [specify confidential information].
+
+## 6. TERMINATION
+This Agreement may be terminated by [describe termination conditions].
+
+## 7. GOVERNING LAW
+This Agreement shall be governed by the laws of [JURISDICTION].
+
+## SIGNATURES:
+
+____________________                    ____________________
+[PARTY A NAME]                          [PARTY B NAME]
+Date:                                   Date:
+`;
+  } else if (
+    cleanType.includes("letter") ||
+    cleanType.includes("correspondence")
+  ) {
+    template = `[YOUR NAME]
+[YOUR ADDRESS]
+[CITY, STATE ZIP]
+[YOUR EMAIL]
+[YOUR PHONE]
+
+[DATE]
+
+[RECIPIENT NAME]
+[RECIPIENT TITLE]
+[COMPANY NAME]
+[COMPANY ADDRESS]
+[CITY, STATE ZIP]
+
+Dear [RECIPIENT NAME],
+
+Re: [SUBJECT OF LETTER]
+
+[Introduction paragraph explaining the purpose of your letter]
+
+[Body paragraph providing details and context]
+
+[Additional paragraphs as needed]
+
+[Closing paragraph with any action items or next steps]
+
+Sincerely,
+
+[YOUR SIGNATURE]
+
+[YOUR TYPED NAME]
+[YOUR TITLE]
+`;
+  } else {
+    // Generic document template
+    template = `# ${templateType.toUpperCase()}
+
+## Document Information
+- Created by: [YOUR NAME]
+- Date: [CURRENT DATE]
+- Version: 1.0
+
+## Introduction
+[Briefly describe the purpose of this document]
+
+## Main Content
+[Insert the main content here]
+
+## Key Points
+- [Point 1]
+- [Point 2]
+- [Point 3]
+
+## Additional Information
+[Any extra information that may be relevant]
+
+## Conclusion
+[Summarize the document and include any final thoughts]
+
+---
+Document prepared by [YOUR NAME/COMPANY]
+Contact: [YOUR EMAIL/PHONE]
+`;
+  }
+
+  return template;
+};
+
 export default function Documents() {
   const [showModal, setShowModal] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -512,15 +631,18 @@ export default function Documents() {
 
     setIsGeneratingTemplate(true);
     try {
+      // Keep it simple - just ask for a brief template
+      const simplifiedPrompt = `Generate a simple ${customTemplatePrompt} document template`;
+      console.log("Sending simplified prompt:", simplifiedPrompt);
+
       const response = await fetch("/api/documents/edit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content:
-            "Please generate a new document template based on the following description.", // Non-empty content
-          prompt: `Generate a detailed ${customTemplatePrompt} document template. Make it professional and comprehensive.`,
+          content: "Template generation request", // Non-empty content
+          prompt: simplifiedPrompt,
         }),
       });
 
@@ -555,11 +677,51 @@ export default function Documents() {
         setIsEditing(true);
         setCustomTemplatePrompt("");
       } else {
-        throw new Error(data.error || "Failed to generate template");
+        if (data.timeoutError) {
+          throw new Error(
+            "The template generation took too long. Please try a simpler description."
+          );
+        } else {
+          throw new Error(data.error || "Failed to generate template");
+        }
       }
     } catch (error) {
       console.error("Error generating template:", error);
-      alert(`Failed to generate template: ${error.message}`);
+
+      if (
+        error.message.includes("FUNCTION_INVOCATION_TIMEOUT") ||
+        error.message.includes("timeout")
+      ) {
+        // Use fallback template when AI times out
+        const useFallback = window.confirm(
+          "The AI template generation timed out. Would you like to use a basic template instead?"
+        );
+
+        if (useFallback) {
+          // Generate a fallback template
+          const fallbackContent =
+            generateFallbackTemplate(customTemplatePrompt);
+          setDocumentContent(fallbackContent);
+          setDocumentName(
+            `Custom ${customTemplatePrompt} - ${new Date().toLocaleDateString()}`
+          );
+
+          // Create a custom template object
+          const customTemplate = {
+            id: "custom-generated-fallback",
+            name: `Custom: ${customTemplatePrompt}`,
+            icon: "✨",
+            description: "Basic template",
+          };
+
+          setSelectedTemplate(customTemplate);
+          setShowCustomTemplateModal(false);
+          setIsEditing(true);
+          setCustomTemplatePrompt("");
+        }
+      } else {
+        alert(`Failed to generate template: ${error.message}`);
+      }
     } finally {
       setIsGeneratingTemplate(false);
     }

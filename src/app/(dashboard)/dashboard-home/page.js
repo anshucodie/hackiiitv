@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
@@ -61,22 +61,41 @@ function formatTimeRemaining(expiryDate) {
 // Function to fetch documents from MongoDB
 async function fetchDocuments() {
   try {
+    console.log("Attempting to fetch documents...");
     const response = await fetch("/api/documents", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
+      // Add cache: 'no-store' to prevent caching issues
+      cache: "no-store",
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch documents");
+    // Get the raw response text for better debugging
+    const responseText = await response.text();
+    console.log("Raw API response:", responseText);
+
+    // Try to parse as JSON
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error("Failed to parse API response as JSON:", parseError);
+      throw new Error(`Invalid API response: ${responseText}`);
     }
 
-    const data = await response.json();
+    // Check for API errors
+    if (!response.ok) {
+      const errorMessage =
+        data?.error || data?.message || "Failed to fetch documents";
+      console.error("API error response:", data);
+      throw new Error(errorMessage);
+    }
+
     return data.documents || [];
   } catch (error) {
     console.error("Error fetching documents:", error);
-    return [];
+    throw error;
   }
 }
 
@@ -180,6 +199,65 @@ const setDummyExpiryDates = async () => {
   }
 };
 
+// Function to check API health
+async function checkApiHealth() {
+  try {
+    console.log("Checking API health...");
+    const response = await fetch("/api/health", {
+      method: "GET",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      return {
+        ok: false,
+        message: `API health check failed with status: ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    return {
+      ok: true,
+      message: data.message || "API is healthy",
+      mongodb: data.mongodb,
+    };
+  } catch (error) {
+    console.error("API health check failed:", error);
+    return {
+      ok: false,
+      message: error.message || "API health check failed",
+    };
+  }
+}
+
+// Fallback documents when API fails
+const MOCK_DOCUMENTS = [
+  {
+    _id: "mock-doc-1",
+    name: "Sample Contract",
+    content: "This is a sample contract...",
+    createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    size: "24 KB",
+    expiryDate: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days from now
+  },
+  {
+    _id: "mock-doc-2",
+    name: "Example Agreement",
+    content: "This is an example agreement...",
+    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+    size: "18 KB",
+    expiryDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
+  },
+  {
+    _id: "mock-doc-3",
+    name: "Demo Document",
+    content: "This is a demo document...",
+    createdAt: new Date().toISOString(), // today
+    size: "12 KB",
+    expiryDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(), // 14 days from now
+  },
+];
+
 export default function DashboardHome() {
   const router = useRouter();
   const { isLoaded, isSignedIn, user } = useUser();
@@ -191,13 +269,37 @@ export default function DashboardHome() {
   const [isLoading, setIsLoading] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
   const [lastScan, setLastScan] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   const [scanError, setScanError] = useState(null);
+  const [apiHealth, setApiHealth] = useState(null);
+  const [useMockData, setUseMockData] = useState(false); // Flag to use mock data
 
+  // Check API health on component mount
   useEffect(() => {
-    const loadDocuments = async () => {
-      setIsLoading(true);
-      try {
-        const docs = await fetchDocuments();
+    const checkHealth = async () => {
+      if (isLoaded && isSignedIn) {
+        const health = await checkApiHealth();
+        setApiHealth(health);
+
+        if (!health.ok || health.mongodb === false) {
+          setFetchError(`API connection issue: ${health.message}`);
+        }
+      }
+    };
+
+    checkHealth();
+  }, [isLoaded, isSignedIn]);
+
+  // Function to load documents from API or mock data
+  const loadDocuments = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      if (useMockData) {
+        console.log("Using mock data as fallback");
+        // Use mock data directly
+        const docs = MOCK_DOCUMENTS;
+
+        // Set all documents
         setDocuments(docs);
         setTotalDocs(docs.length);
 
@@ -224,34 +326,101 @@ export default function DashboardHome() {
             expiresOn: doc.expiryDate,
             timeRemaining: calculateTimeRemaining(doc.expiryDate),
           }))
-          // Sort by time remaining (ascending)
           .sort((a, b) => a.timeRemaining - b.timeRemaining);
 
         setSoonExpiringDocs(expiringDocs);
 
-        // If no expiry dates found or it's been more than a day since last scan, trigger a scan
-        const storedLastScan = localStorage.getItem("lastDocumentScan");
-        if (
-          docs.length > 0 &&
-          (expiringDocs.length === 0 ||
-            !storedLastScan ||
-            new Date() - new Date(storedLastScan) > 24 * 60 * 60 * 1000)
-        ) {
-          scanDocuments();
-        } else if (storedLastScan) {
-          setLastScan(new Date(storedLastScan));
-        }
-      } catch (error) {
-        console.error("Error loading documents:", error);
-      } finally {
+        setFetchError(null);
         setIsLoading(false);
+        return;
       }
-    };
 
+      // Check API health first
+      const healthResponse = await fetch("/api/health");
+      const healthData = await healthResponse.json();
+      setApiHealth(healthData);
+
+      // If MongoDB is not connected, suggest using mock data
+      if (!healthData.mongodb) {
+        setFetchError("Database connection issue. Please try using demo data.");
+        setIsLoading(false);
+        return;
+      }
+
+      // If we reach here, attempt to fetch real documents
+      const response = await fetchDocuments();
+
+      if (!Array.isArray(response)) {
+        throw new Error("API returned unexpected data format");
+      }
+
+      const docs = response;
+
+      setDocuments(docs);
+      setTotalDocs(docs.length);
+
+      // Sort by createdAt and set recent docs
+      const sorted = [...docs].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      const recent = sorted.slice(0, 3).map((doc) => ({
+        id: doc._id,
+        name: doc.name,
+        date: formatRelativeTime(doc.createdAt),
+      }));
+
+      setRecentDocs(recent);
+
+      // Get documents with expiry dates
+      const expiringDocs = docs
+        .filter((doc) => doc.expiryDate)
+        .filter((doc) => isExpiringSoon(doc.expiryDate))
+        .map((doc) => ({
+          id: doc._id,
+          title: doc.name,
+          expiresOn: doc.expiryDate,
+          timeRemaining: calculateTimeRemaining(doc.expiryDate),
+        }))
+        .sort((a, b) => a.timeRemaining - b.timeRemaining);
+
+      setSoonExpiringDocs(expiringDocs);
+
+      // If no expiry dates found or it's been more than a day since last scan, trigger a scan
+      const storedLastScan = localStorage.getItem("lastDocumentScan");
+      if (
+        docs.length > 0 &&
+        (expiringDocs.length === 0 ||
+          !storedLastScan ||
+          new Date() - new Date(storedLastScan) > 24 * 60 * 60 * 1000)
+      ) {
+        scanDocuments();
+      } else if (storedLastScan) {
+        setLastScan(new Date(storedLastScan));
+      }
+
+      setFetchError(null);
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error loading documents:", error);
+      setFetchError(error.message || "Failed to load documents");
+
+      // Set empty data
+      setDocuments([]);
+      setTotalDocs(0);
+      setRecentDocs([]);
+      setSoonExpiringDocs([]);
+
+      setIsLoading(false);
+    }
+  }, [useMockData]);
+
+  // Load documents when component mounts or when useMockData changes
+  useEffect(() => {
     if (isLoaded && isSignedIn) {
       loadDocuments();
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isLoaded, isSignedIn, loadDocuments, useMockData]);
 
   // Function to trigger document scanning
   const scanDocuments = async () => {
@@ -321,10 +490,79 @@ export default function DashboardHome() {
     router.push("/documents");
   };
 
-  if (!isLoaded || !isSignedIn) {
+  // Return early with error display if document fetching fails
+  if (fetchError && !isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen h-screen w-full bg-[#f3f5ec] px-10 py-8">
+        <h1 className="text-3xl font-bold text-[#181818] mb-2">
+          Welcome back, {user?.firstName || "there"}!
+        </h1>
+
+        <div className="bg-red-50 border-l-4 border-red-500 p-6 my-8 rounded-lg shadow-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-6 w-6 text-red-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <h3 className="text-lg font-medium text-red-800">
+                Failed to load your documents
+              </h3>
+              <div className="mt-2 text-red-700">
+                <p>{fetchError}</p>
+                {apiHealth && !apiHealth.ok && (
+                  <p className="mt-2 text-sm">
+                    API Status: {apiHealth.message}
+                  </p>
+                )}
+                {apiHealth && apiHealth.mongodb === false && (
+                  <p className="mt-2 text-sm">
+                    MongoDB connection failed. Please check your database
+                    configuration.
+                  </p>
+                )}
+              </div>
+              <div className="mt-4 flex space-x-4">
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-4 py-2 bg-red-100 text-red-800 rounded-md hover:bg-red-200 transition-colors"
+                >
+                  Try Again
+                </button>
+                <button
+                  onClick={() => setUseMockData(true)}
+                  className="px-4 py-2 bg-green-100 text-green-800 rounded-md hover:bg-green-200 transition-colors"
+                >
+                  Use Demo Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-[#fdfdfd] border-l-4 border-[#C5C69A] px-6 py-4 mt-10 rounded-xl shadow text-sm text-gray-700">
+          <p>
+            <strong>Troubleshooting tips:</strong>
+          </p>
+          <ul className="mt-2 list-disc list-inside">
+            <li>Check your internet connection</li>
+            <li>Make sure MongoDB connection is properly configured</li>
+            <li>Verify that you have access to the documents</li>
+            <li>
+              Check if the MONGODB_URI environment variable is set correctly
+            </li>
+            <li>Try using demo data to test the UI functionality</li>
+          </ul>
+        </div>
       </div>
     );
   }
