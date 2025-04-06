@@ -32,7 +32,7 @@ async function extractExpiryDate(content, name) {
     The document is titled: "${name}"
     
     Document content:
-    ${content.substring(0, 5000)}  // Limit content length for API constraints
+    ${content.substring(0, 100000)}  // Limit content length for API constraints
     
     Extract ONLY the expiry date in YYYY-MM-DD format. If no specific expiry date is found, respond with "NONE".
     `;

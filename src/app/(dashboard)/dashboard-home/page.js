@@ -577,14 +577,14 @@ export default function DashboardHome() {
       </h1>
 
       {/* Quick Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-8 mt-8 ">
+      <div className="flex flex-col sm:flex-row gap-4 mb-8 mt-8">
         <motion.button
           whileHover={{ scale: 1.05 }}
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2 }}
           onClick={goToDocuments}
-          className="bg-[#181818] text-white py-2 px-6 rounded-3xl flex flex-row gap-3"
+          className="bg-[#181818] text-white py-2 px-6 rounded-3xl flex flex-row gap-3 hover:cursor-pointer hover:bg-[#cfd490] hover:text-black transition-all duration-300"
         >
           <Plus /> New Document
         </motion.button>
@@ -597,7 +597,7 @@ export default function DashboardHome() {
           transition={{ delay: 0.3 }}
           onClick={scanDocuments}
           disabled={isScanning}
-          className="bg-[#181818] text-white py-2 px-6 rounded-3xl flex flex-row gap-3 disabled:opacity-50"
+          className="bg-[#181818] text-white py-2 px-6 rounded-3xl flex flex-row gap-3 disabled:opacity-50 hover:cursor-pointer hover:bg-[#cfd490] hover:text-black transition-all duration-300"
         >
           {isScanning ? "Scanning..." : "Scan Documents"}
         </motion.button>
